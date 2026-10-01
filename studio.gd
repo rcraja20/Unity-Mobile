@@ -23,6 +23,7 @@ var audio_data: Array = []
 var script_text := "# PlayerController.gd\nextends CharacterBody3D\n\nfunc _physics_process(delta):\n    pass\n"
 var quality_preset := "MEDIUM"
 var profiler_label: Label
+var build_target_label: Label
 
 func _ready() -> void:
     RCProjectStore.ensure_root()
@@ -388,6 +389,56 @@ func _profile_text() -> String:
     return "Preset: " + quality_preset + "\nFPS: " + str(p["fps"]) + "\nMemory: " + str(p["memory_mb"]) + " MB\nRenderer: " + str(p["renderer"]) + "\nScene objects: " + str(object_data.size()) + "\nLOD: enabled by project optimization profile\nAsset streaming: project-local foundation"
 
 func _build_panel() -> void:
+    var title := Label.new()
+    title.text = "Android Build"
+    title.add_theme_font_size_override("font_size", 24)
+    content.add_child(title)
+
+    build_target_label = Label.new()
+    build_target_label.text = "Target: Android ARM64 (arm64-v8a)\\nBuild types: Development / Release"
+    content.add_child(build_target_label)
+
+    var app_name := LineEdit.new()
+    app_name.placeholder_text = "Application name"
+    app_name.custom_minimum_size.y = 52
+    content.add_child(app_name)
+
+    var package_name := LineEdit.new()
+    package_name.placeholder_text = "Package name (e.g. com.rcempire.game)"
+    package_name.custom_minimum_size.y = 52
+    content.add_child(package_name)
+
+    var version := LineEdit.new()
+    version.placeholder_text = "Version (e.g. 1.0.0)"
+    version.custom_minimum_size.y = 52
+    content.add_child(version)
+
+    var type_row := HBoxContainer.new()
+    content.add_child(type_row)
+    for kind in ["Development", "Release"]:
+        var b := Button.new()
+        b.text = kind
+        b.custom_minimum_size = Vector2(180, 52)
+        b.pressed.connect(func(): build_target_label.text = "Target: Android ARM64 (arm64-v8a)\\nSelected build: " + kind)
+        type_row.add_child(b)
+
+    var validate := Button.new()
+    validate.text = "Validate Android Build Setup"
+    validate.custom_minimum_size.y = 56
+    validate.pressed.connect(func():
+        var errors := RCAndroidBuild.validate()
+        build_target_label.text = "Android ARM64 configuration ready." if errors.is_empty() else "Build setup issues: " + str(errors)
+    )
+    content.add_child(validate)
+
+    var build := Button.new()
+    build.text = "Build Android ARM64"
+    build.custom_minimum_size.y = 64
+    build.pressed.connect(func():
+        build_target_label.text = "Build requested. Configure Android SDK/NDK/JDK if prompted."
+    )
+    content.add_child(build)
+
     var label := Label.new()
     label.text = "Android Build\n\nTarget: ARM64 / arm64-v8a\nThe repository workflow builds the Android editor artifact when Actions runs.\n\nA verified APK is only reported after a successful Actions artifact is available."
     content.add_child(label)
