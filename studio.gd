@@ -24,6 +24,7 @@ var script_text := "# PlayerController.gd\nextends CharacterBody3D\n\nfunc _phys
 var quality_preset := "MEDIUM"
 var profiler_label: Label
 var build_target_label: Label
+var privacy_label: Label
 
 func _ready() -> void:
     RCProjectStore.ensure_root()
@@ -84,7 +85,7 @@ func _build_ui() -> void:
     sidebar.custom_minimum_size.x = 250
     sidebar.add_theme_constant_override("separation", 8)
     body.add_child(sidebar)
-    for label in ["Projects", "Scene", "Hierarchy", "Inspector", "Assets", "Scripts", "Console", "Profiler", "Build"]:
+    for label in ["Projects", "Scene", "Hierarchy", "Inspector", "Assets", "Scripts", "Console", "Profiler", "Build", "Privacy"]:
         var b := Button.new()
         b.text = label
         b.custom_minimum_size.y = 50
@@ -387,6 +388,31 @@ func _set_quality_preset(preset: String) -> void:
 func _profile_text() -> String:
     var p := RCMobileOptimizer.profile_snapshot()
     return "Preset: " + quality_preset + "\nFPS: " + str(p["fps"]) + "\nMemory: " + str(p["memory_mb"]) + " MB\nRenderer: " + str(p["renderer"]) + "\nScene objects: " + str(object_data.size()) + "\nLOD: enabled by project optimization profile\nAsset streaming: project-local foundation"
+
+func _privacy_panel() -> void:
+    var title := Label.new()
+    title.text = "Privacy & Security"
+    title.add_theme_font_size_override("font_size", 24)
+    content.add_child(title)
+
+    privacy_label = Label.new()
+    privacy_label.text = "Offline-first project storage is enabled.\\nNo silent project upload.\\nNo hidden telemetry.\\nCredentials are not stored in the client."
+    content.add_child(privacy_label)
+
+    var root := LineEdit.new()
+    root.text = RCOfflineSecurity.project_root()
+    root.editable = false
+    root.custom_minimum_size.y = 52
+    content.add_child(root)
+
+    var check := Button.new()
+    check.text = "Check Local Privacy Policy"
+    check.custom_minimum_size.y = 56
+    check.pressed.connect(func():
+        var p := RCOfflineSecurity.policy()
+        privacy_label.text = "Offline-first: " + str(p["offline_first"]) + "\\nLocal storage: " + str(p["local_project_storage"]) + "\\nSilent upload: " + str(p["silent_upload"]) + "\\nHidden telemetry: " + str(p["hidden_telemetry"])
+    )
+    content.add_child(check)
 
 func _build_panel() -> void:
     var title := Label.new()
