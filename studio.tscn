@@ -3,6 +3,9 @@
 
 [ext_resource path="res://studio.gd" type="Script" id="1"]
 
+[node name="RCInputSystem" type="Node" parent="."]
+script = ExtResource("3_input")
+
 [node name="RCMobileStudio" type="Control"]
 layout_mode = 3
 anchors_preset = 15
