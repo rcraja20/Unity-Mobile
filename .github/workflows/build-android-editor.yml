@@ -34,7 +34,7 @@ jobs:
         run: git clone --depth 1 --branch 4.6-stable https://github.com/godotengine/godot.git godot
       - name: Build Android ARM64 editor
         working-directory: godot
-        run: scons platform=android arch=arm64 production=yes target=editor generate_android_binaries=yes
+        run: scons platform=android arch=arm64 production=yes target=editor generate_android_binaries=yes swappy=no
       - name: Collect artifacts
         run: |
           mkdir -p dist
