@@ -26,3 +26,5 @@ The repository now contains an integrated mobile editor foundation covering loca
 This repository uses Godot as an open-source foundation. It is not a redistribution of Unity source and does not claim Unity licensing, Unity package compatibility, or Unity service compatibility. A genuine Unity-source adaptation requires the authorized Unity source distribution and applicable permissions.
 
 The Android workflow is a CI build pipeline; an APK/editor artifact is only considered verified after a successful GitHub Actions run produces the artifact.
+## Current milestone
+The repository currently contains the mobile editor foundation and a CI Android ARM64 editor build workflow. Feature-complete status is intentionally not claimed until the implementation is built and tested successfully.
