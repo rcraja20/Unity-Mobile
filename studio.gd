@@ -25,6 +25,7 @@ var quality_preset := "MEDIUM"
 var profiler_label: Label
 var build_target_label: Label
 var privacy_label: Label
+var accessibility_label: Label
 
 func _ready() -> void:
     RCProjectStore.ensure_root()
@@ -85,7 +86,7 @@ func _build_ui() -> void:
     sidebar.custom_minimum_size.x = 250
     sidebar.add_theme_constant_override("separation", 8)
     body.add_child(sidebar)
-    for label in ["Projects", "Scene", "Hierarchy", "Inspector", "Assets", "Scripts", "Console", "Profiler", "Build", "Privacy"]:
+    for label in ["Projects", "Scene", "Hierarchy", "Inspector", "Assets", "Scripts", "Console", "Profiler", "Build", "Privacy", "Accessibility"]:
         var b := Button.new()
         b.text = label
         b.custom_minimum_size.y = 50
@@ -388,6 +389,35 @@ func _set_quality_preset(preset: String) -> void:
 func _profile_text() -> String:
     var p := RCMobileOptimizer.profile_snapshot()
     return "Preset: " + quality_preset + "\nFPS: " + str(p["fps"]) + "\nMemory: " + str(p["memory_mb"]) + " MB\nRenderer: " + str(p["renderer"]) + "\nScene objects: " + str(object_data.size()) + "\nLOD: enabled by project optimization profile\nAsset streaming: project-local foundation"
+
+func _accessibility_panel() -> void:
+    var title := Label.new()
+    title.text = "Accessibility & Layout"
+    title.add_theme_font_size_override("font_size", 24)
+    content.add_child(title)
+
+    accessibility_label = Label.new()
+    accessibility_label.text = "Large touch targets: ON\\nUI scale: 100%\\nHigh contrast: OFF\\nReduced motion: OFF\\nHanded layout: Right"
+    content.add_child(accessibility_label)
+
+    var scale := HSlider.new()
+    scale.min_value = 0.85
+    scale.max_value = 1.50
+    scale.step = 0.05
+    scale.value = 1.0
+    scale.custom_minimum_size.y = 56
+    content.add_child(scale)
+
+    var contrast := CheckButton.new()
+    contrast.text = "High Contrast"
+    contrast.pressed.connect(func(v):
+        accessibility_label.text = "Large touch targets: ON\\nUI scale: " + str(int(scale.value * 100.0)) + "%\\nHigh contrast: " + str(v) + "\\nReduced motion: OFF\\nHanded layout: Right"
+    )
+    content.add_child(contrast)
+
+    var reduced := CheckButton.new()
+    reduced.text = "Reduced Motion"
+    content.add_child(reduced)
 
 func _privacy_panel() -> void:
     var title := Label.new()
