@@ -17,8 +17,8 @@ var viewport_info: Label
 
 func _ready() -> void:
     RCProjectStore.ensure_root()
+    _refresh_project_names()
     _build_ui()
-    _refresh_projects()
 
 func _build_ui() -> void:
     var bg := ColorRect.new()
