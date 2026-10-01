@@ -26,6 +26,7 @@ var profiler_label: Label
 var build_target_label: Label
 var privacy_label: Label
 var accessibility_label: Label
+var asset_search: LineEdit
 
 func _ready() -> void:
     RCProjectStore.ensure_root()
@@ -86,7 +87,7 @@ func _build_ui() -> void:
     sidebar.custom_minimum_size.x = 250
     sidebar.add_theme_constant_override("separation", 8)
     body.add_child(sidebar)
-    for label in ["Projects", "Scene", "Hierarchy", "Inspector", "Assets", "Scripts", "Console", "Profiler", "Build", "Privacy", "Accessibility"]:
+    for label in ["Projects", "Scene", "Hierarchy", "Inspector", "Assets", "Asset Manager", "Scripts", "Console", "Profiler", "Build", "Privacy", "Accessibility"]:
         var b := Button.new()
         b.text = label
         b.custom_minimum_size.y = 50
@@ -418,6 +419,39 @@ func _accessibility_panel() -> void:
     var reduced := CheckButton.new()
     reduced.text = "Reduced Motion"
     content.add_child(reduced)
+
+func _asset_manager_panel() -> void:
+    var title := Label.new()
+    title.text = "Asset Manager"
+    title.add_theme_font_size_override("font_size", 24)
+    content.add_child(title)
+
+    asset_search = LineEdit.new()
+    asset_search.placeholder_text = "Search assets..."
+    asset_search.custom_minimum_size.y = 52
+    content.add_child(asset_search)
+
+    var types := OptionButton.new()
+    for item in RCAssetManager.supported_types():
+        types.add_item(item)
+    content.add_child(types)
+
+    var actions := HBoxContainer.new()
+    content.add_child(actions)
+    for label in ["Import", "Create Folder", "Refresh"]:
+        var b := Button.new()
+        b.text = label
+        b.custom_minimum_size = Vector2(150, 52)
+        actions.add_child(b)
+
+    var list := ItemList.new()
+    list.custom_minimum_size.y = 300
+    list.add_item("Main Scene")
+    list.add_item("PlayerMaterial")
+    list.add_item("PlayerController.gd")
+    list.add_item("MainAnimation")
+    list.add_item("Theme")
+    content.add_child(list)
 
 func _privacy_panel() -> void:
     var title := Label.new()
