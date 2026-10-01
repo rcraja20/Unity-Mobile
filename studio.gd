@@ -83,7 +83,7 @@ func _build_ui() -> void:
     sidebar.custom_minimum_size.x = 250
     sidebar.add_theme_constant_override("separation", 8)
     body.add_child(sidebar)
-    for label in ["Projects", "Scene", "Hierarchy", "Inspector", "Assets", "Scripts", "Console", "Build"]:
+    for label in ["Projects", "Scene", "Hierarchy", "Inspector", "Assets", "Scripts", "Console", "Profiler", "Build"]:
         var b := Button.new()
         b.text = label
         b.custom_minimum_size.y = 50
