@@ -21,6 +21,8 @@ var material_data: Array = []
 var animation_data: Array = []
 var audio_data: Array = []
 var script_text := "# PlayerController.gd\nextends CharacterBody3D\n\nfunc _physics_process(delta):\n    pass\n"
+var quality_preset := "MEDIUM"
+var profiler_label: Label
 
 func _ready() -> void:
     RCProjectStore.ensure_root()
@@ -120,7 +122,8 @@ func _show_panel(name: String) -> void:
         "Assets": _assets_panel()
         "Scripts": _scripts_panel()
         "Console": _console_panel()
-        "Build": _build_panel()
+        "Build": _build_panel(),
+        "Profiler": _profiler_panel()
 
 func _projects_panel() -> void:
     var info := Label.new()
@@ -343,6 +346,46 @@ func _console_panel() -> void:
     var label := Label.new()
     label.text = "Console\n[INFO] RC Mobile Studio ready.\n[INFO] Local-first project store initialized."
     content.add_child(label)
+
+func _profiler_panel() -> void:
+    var title := Label.new()
+    title.text = "Mobile Profiler"
+    title.add_theme_font_size_override("font_size", 24)
+    content.add_child(title)
+
+    var preset_row := HBoxContainer.new()
+    content.add_child(preset_row)
+    for preset in ["LOW","MEDIUM","HIGH","ULTRA"]:
+        var b := Button.new()
+        b.text = preset
+        b.custom_minimum_size = Vector2(120, 48)
+        b.pressed.connect(_set_quality_preset.bind(preset))
+        preset_row.add_child(b)
+
+    profiler_label = Label.new()
+    profiler_label.size_flags_vertical = Control.SIZE_EXPAND_FILL
+    profiler_label.text = _profile_text()
+    content.add_child(profiler_label)
+
+    var refresh := Button.new()
+    refresh.text = "Refresh Metrics"
+    refresh.custom_minimum_size.y = 50
+    refresh.pressed.connect(func():
+        profiler_label.text = _profile_text()
+    )
+    content.add_child(refresh)
+
+func _set_quality_preset(preset: String) -> void:
+    quality_preset = preset
+    var settings := RCMobileOptimizer.apply_preset(preset)
+    Engine.max_fps = int(settings["fps"])
+    status_label.text = "Quality preset: " + preset + " (" + str(settings["fps"]) + " FPS target)"
+    if profiler_label:
+        profiler_label.text = _profile_text()
+
+func _profile_text() -> String:
+    var p := RCMobileOptimizer.profile_snapshot()
+    return "Preset: " + quality_preset + "\nFPS: " + str(p["fps"]) + "\nMemory: " + str(p["memory_mb"]) + " MB\nRenderer: " + str(p["renderer"]) + "\nScene objects: " + str(object_data.size()) + "\nLOD: enabled by project optimization profile\nAsset streaming: project-local foundation"
 
 func _build_panel() -> void:
     var label := Label.new()
