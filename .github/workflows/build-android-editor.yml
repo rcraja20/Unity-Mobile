@@ -38,8 +38,10 @@ jobs:
       - name: Collect artifacts
         run: |
           mkdir -p dist
-          find godot/bin -type f \( -name '*.apk' -o -name '*android*' \) -exec cp {} dist/ \; || true
+          find godot/bin/android_editor_builds -type f -name '*.apk' -exec cp {} dist/ \; || true
           find dist -type f -print
+      - name: Verify APK artifact
+        run: test -n "$(find dist -type f -name '*.apk' -print -quit)"
       - name: Upload editor artifact
         uses: actions/upload-artifact@v4
         with:
