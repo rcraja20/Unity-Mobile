@@ -35,6 +35,10 @@ func _unhandled_input(event: InputEvent) -> void:
                 tap.emit(event.position)
                 _last_tap_time = Time.get_ticks_msec() / 1000.0
                 _last_tap_position = event.position
+    elif event is InputEventMagnifyGesture:
+        pinch.emit(event.factor, event.position)
+    elif event is InputEventPanGesture:
+        two_finger_pan.emit(event.delta, event.position)
     elif event is InputEventScreenDrag:
         drag.emit(event.relative)
     elif event is InputEventMouseMotion and event.button_mask != 0:
