@@ -14,9 +14,22 @@ var content: VBoxContainer
 var project_list: VBoxContainer
 var hierarchy_list: VBoxContainer
 var viewport_info: Label
+var core_tab := "Assets"
+var component_data: Dictionary = {}
+var asset_data: Array = []
+var material_data: Array = []
+var animation_data: Array = []
+var audio_data: Array = []
+var script_text := "# PlayerController.gd\nextends CharacterBody3D\n\nfunc _physics_process(delta):\n    pass\n"
 
 func _ready() -> void:
     RCProjectStore.ensure_root()
+    for c in RCCoreEditor.default_components():
+        component_data[c.name] = c
+    asset_data = RCCoreEditor.default_assets()
+    material_data = RCCoreEditor.default_materials()
+    animation_data = RCCoreEditor.default_animations()
+    audio_data = RCCoreEditor.default_audio()
     _refresh_project_names()
     _build_ui()
 
@@ -208,7 +221,6 @@ func _inspector_panel() -> void:
     heading.text = "Selected: " + selected_object
     heading.add_theme_font_size_override("font_size", 22)
     content.add_child(heading)
-
     for key in ["position", "rotation", "scale"]:
         var row := HBoxContainer.new()
         var label := Label.new()
@@ -221,12 +233,38 @@ func _inspector_panel() -> void:
         edit.text_submitted.connect(_set_transform.bind(key, edit))
         row.add_child(edit)
         content.add_child(row)
-
     var save := Button.new()
     save.text = "Apply Transform"
     save.custom_minimum_size.y = 52
     save.pressed.connect(_show_panel.bind("Scene"))
     content.add_child(save)
+    var title := Label.new()
+    title.text = "Components"
+    title.add_theme_font_size_override("font_size", 20)
+    content.add_child(title)
+    for component_name in component_data.keys():
+        var toggle := CheckButton.new()
+        toggle.text = str(component_name)
+        toggle.button_pressed = bool(component_data[component_name].get("enabled", false))
+        toggle.custom_minimum_size.y = 46
+        toggle.toggled.connect(_toggle_component.bind(component_name))
+        content.add_child(toggle)
+    var add := Button.new()
+    add.text = "＋ Add Component"
+    add.custom_minimum_size.y = 50
+    add.pressed.connect(_add_component)
+    content.add_child(add)
+
+func _toggle_component(component_name: String, enabled: bool) -> void:
+    component_data[component_name]["enabled"] = enabled
+    status_label.text = component_name + (" enabled" if enabled else " disabled")
+
+func _add_component() -> void:
+    var name := "CustomComponent" + str(component_data.size() + 1)
+    component_data[name] = {"name":name,"enabled":true,"type":"Custom"}
+    status_label.text = "Added component: " + name
+    _show_panel("Inspector")
+
 
 func _set_transform(key: String, edit: LineEdit) -> void:
     object_data[selected_object][key] = edit.text
@@ -238,8 +276,61 @@ func _scene_action(action: String) -> void:
         viewport_info.text = "3D VIEWPORT\n\nSelected: " + (selected_object if selected_object else "None") + "\nLast action: " + action
 
 func _assets_panel() -> void:
+    var search := LineEdit.new()
+    search.placeholder_text = "Search assets..."
+    search.custom_minimum_size.y = 48
+    content.add_child(search)
+    for tab in ["Assets","Materials","Animation","Audio"]:
+        var b := Button.new()
+        b.text = tab
+        b.custom_minimum_size.y = 44
+        b.pressed.connect(_asset_tab.bind(tab))
+        content.add_child(b)
+    var source: Array = asset_data
+    if core_tab == "Materials":
+        source = material_data
+    elif core_tab == "Animation":
+        source = animation_data
+    elif core_tab == "Audio":
+        source = audio_data
+    for item in source:
+        var row := Label.new()
+        row.text = "• " + str(item.get("name","")) + "  [" + core_tab + "]"
+        row.custom_minimum_size.y = 36
+        content.add_child(row)
+    var import_btn := Button.new()
+    import_btn.text = "＋ Import Asset"
+    import_btn.custom_minimum_size.y = 50
+    import_btn.pressed.connect(_import_asset)
+    content.add_child(import_btn)
+
+func _asset_tab(tab: String) -> void:
+    core_tab = tab
+    _show_panel("Assets")
+
+func _import_asset() -> void:
+    status_label.text = "Asset import workflow ready for the Android file picker."
+
+func _scripts_panel() -> void:
+    var path := Label.new()
+    path.text = "scripts/PlayerController.gd"
+    content.add_child(path)
+    var edit := TextEdit.new()
+    edit.text = script_text
+    edit.size_flags_vertical = Control.SIZE_EXPAND_FILL
+    content.add_child(edit)
+    var save := Button.new()
+    save.text = "Save Script"
+    save.custom_minimum_size.y = 50
+    save.pressed.connect(func():
+        script_text = edit.text
+        status_label.text = "Script saved in editor session."
+    )
+    content.add_child(save)
+
+func _console_panel() -> void:
     var label := Label.new()
-    label.text = "Assets\n\nLocal asset browser foundation.\nImport/search integration is the next asset milestone."
+    label.text = "[INFO] RC Mobile Studio ready.\n[INFO] Local project store initialized.\n[INFO] Core components/resources loaded."
     content.add_child(label)
 
 func _scripts_panel() -> void:
