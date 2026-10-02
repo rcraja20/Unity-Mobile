@@ -22,6 +22,14 @@ var accessibility_label: Label
 var console_text: TextEdit
 var scene_doc := RCSceneDocument.new()
 var diagnostics := RCDiagnostics.new()
+var scene_camera: Camera3D
+var scene_world: Node3D
+var scene_view_container: SubViewportContainer
+var orbit_yaw := 35.0
+var orbit_pitch := -22.0
+var orbit_distance := 8.0
+var touch_active := false
+var last_pointer := Vector2.ZERO
 
 func _ready() -> void:
     RCProjectStore.ensure_root()
@@ -156,6 +164,109 @@ func _scene_panel() -> void:
         b.custom_minimum_size = Vector2(115, 48)
         b.pressed.connect(_scene_action.bind(action))
         actions.add_child(b)
+
+func _build_3d_viewport() -> Control:
+    var holder := Control.new()
+    holder.custom_minimum_size = Vector2(600, 360)
+    scene_view_container = SubViewportContainer.new()
+    scene_view_container.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+    scene_view_container.stretch = true
+    scene_view_container.mouse_filter = Control.MOUSE_FILTER_PASS
+    holder.add_child(scene_view_container)
+
+    var sub := SubViewport.new()
+    sub.render_target_update_mode = SubViewport.UPDATE_ALWAYS
+    sub.transparent_bg = false
+    sub.world_3d = World3D.new()
+    scene_view_container.add_child(sub)
+
+    scene_world = Node3D.new()
+    sub.add_child(scene_world)
+
+    var env := WorldEnvironment.new()
+    var environment := Environment.new()
+    environment.background_mode = Environment.BG_COLOR
+    environment.background_color = Color("171b22")
+    environment.ambient_light_source = Environment.AMBIENT_SOURCE_COLOR
+    environment.ambient_light_color = Color("aab4c4")
+    environment.ambient_light_energy = 0.55
+    env.environment = environment
+    scene_world.add_child(env)
+
+    var light := DirectionalLight3D.new()
+    light.rotation_degrees = Vector3(-50, -35, 0)
+    light.light_energy = 1.4
+    scene_world.add_child(light)
+
+    scene_camera = Camera3D.new()
+    scene_camera.current = true
+    scene_world.add_child(scene_camera)
+
+    var floor := MeshInstance3D.new()
+    var floor_mesh := PlaneMesh.new()
+    floor_mesh.size = Vector2(20, 20)
+    floor.mesh = floor_mesh
+    floor.position.y = -0.02
+    scene_world.add_child(floor)
+
+    for object_name in object_data.keys():
+        var item: Dictionary = object_data[object_name]
+        var kind := str(item.get("kind", "Node3D"))
+        if kind.contains("Camera") or kind.contains("Light"):
+            continue
+        var visual := MeshInstance3D.new()
+        var box := BoxMesh.new()
+        box.size = Vector3(1, 1, 1)
+        visual.mesh = box
+        visual.name = str(object_name)
+        visual.position = _parse_vec3(str(item.get("position", "0, 0, 0")), Vector3.ZERO)
+        visual.rotation_degrees = _parse_vec3(str(item.get("rotation", "0, 0, 0")), Vector3.ZERO)
+        visual.scale = _parse_vec3(str(item.get("scale", "1, 1, 1")), Vector3.ONE)
+        if str(object_name) == selected_object:
+            var selected_mat := StandardMaterial3D.new()
+            selected_mat.albedo_color = Color("e8b85a")
+            visual.material_override = selected_mat
+        scene_world.add_child(visual)
+
+    _update_scene_camera()
+    return holder
+
+func _update_scene_camera() -> void:
+    if scene_camera == null: return
+    var target := Vector3.ZERO
+    if not selected_object.is_empty() and object_data.has(selected_object):
+        target = _parse_vec3(str(object_data[selected_object].get("position", "0, 0, 0")), Vector3.ZERO)
+    var yaw := deg_to_rad(orbit_yaw)
+    var pitch := deg_to_rad(orbit_pitch)
+    var offset := Vector3(
+        sin(yaw) * cos(pitch),
+        sin(pitch),
+        cos(yaw) * cos(pitch)
+    ) * orbit_distance
+    scene_camera.position = target + offset
+    scene_camera.look_at(target, Vector3.UP)
+
+func _unhandled_input(event: InputEvent) -> void:
+    if event is InputEventScreenTouch:
+        touch_active = event.pressed
+        if event.pressed: last_pointer = event.position
+    elif event is InputEventScreenDrag and touch_active:
+        var delta := event.position - last_pointer
+        last_pointer = event.position
+        orbit_yaw -= delta.x * 0.35
+        orbit_pitch = clamp(orbit_pitch - delta.y * 0.25, -80.0, 80.0)
+        _update_scene_camera()
+    elif event is InputEventMouseButton and event.pressed:
+        if event.button_index == MOUSE_BUTTON_WHEEL_UP:
+            orbit_distance = max(2.0, orbit_distance - 0.6)
+            _update_scene_camera()
+        elif event.button_index == MOUSE_BUTTON_WHEEL_DOWN:
+            orbit_distance = min(40.0, orbit_distance + 0.6)
+            _update_scene_camera()
+    elif event is InputEventMouseMotion and Input.is_mouse_button_pressed(MOUSE_BUTTON_LEFT):
+        orbit_yaw -= event.relative.x * 0.35
+        orbit_pitch = clamp(orbit_pitch - event.relative.y * 0.25, -80.0, 80.0)
+        _update_scene_camera()
 
 func _hierarchy_panel() -> void:
     hierarchy_list = VBoxContainer.new()
