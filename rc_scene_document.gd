@@ -23,6 +23,23 @@ func find_object(id: String) -> Dictionary:
         if o["id"] == id: return o
     return {}
 
+func duplicate_object(id: String) -> String:
+    var source := find_object(id)
+    if source.is_empty(): return ""
+    var copy := source.duplicate(true)
+    copy["id"] = "%s_%s" % [str(source["kind"]).to_lower(), Time.get_ticks_usec()]
+    copy["name"] = "%s Copy" % str(source["name"])
+    objects.append(copy)
+    selected_id = copy["id"]
+    return copy["id"]
+
+func set_parent(id: String, parent_id: String) -> bool:
+    for o in objects:
+        if o["id"] == id:
+            o["parent"] = parent_id
+            return true
+    return false
+
 func set_transform(id: String, position: Vector3, rotation: Vector3, scale: Vector3) -> bool:
     for o in objects:
         if o["id"] == id:
