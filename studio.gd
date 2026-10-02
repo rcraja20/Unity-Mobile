@@ -331,8 +331,18 @@ func _inspector_panel() -> void:
     var apply := Button.new()
     apply.text = "Apply Transform"
     apply.custom_minimum_size.y = 50
-    apply.pressed.connect(_show_panel.bind("Scene"))
+    apply.pressed.connect(func(): _save_current(); _show_panel("Scene"))
     content.add_child(apply)
+    var duplicate := Button.new()
+    duplicate.text = "Duplicate Object"
+    duplicate.custom_minimum_size.y = 50
+    duplicate.pressed.connect(_duplicate_selected)
+    content.add_child(duplicate)
+    var parent := Button.new()
+    parent.text = "Parent To First Object"
+    parent.custom_minimum_size.y = 50
+    parent.pressed.connect(_parent_selected)
+    content.add_child(parent)
     var comp_title := Label.new()
     comp_title.text = "Components"
     comp_title.add_theme_font_size_override("font_size", 20)
@@ -354,8 +364,49 @@ func _inspector_panel() -> void:
 func _set_transform(key: String, edit: LineEdit) -> void:
     if selected_object.is_empty(): return
     object_data[selected_object][key] = edit.text
+    var id := scene_doc.find_by_name(selected_object)
+    if id != "":
+        var parsed := _parse_vec3(edit.text, Vector3.ZERO if key != "scale" else Vector3.ONE)
+        var obj: Dictionary = scene_doc.objects[id]
+        var pos: Vector3 = obj.get("position", Vector3.ZERO)
+        var rot: Vector3 = obj.get("rotation", Vector3.ZERO)
+        var scl: Vector3 = obj.get("scale", Vector3.ONE)
+        if key == "position": pos = parsed
+        elif key == "rotation": rot = parsed
+        else: scl = parsed
+        scene_doc.set_transform(id, pos, rot, scl)
+    _save_current()
     diagnostics.log_info(key.capitalize() + " updated for " + selected_object)
     status_label.text = key.capitalize() + " updated"
+
+func _duplicate_selected() -> void:
+    if selected_object.is_empty() or not object_data.has(selected_object): return
+    var source: Dictionary = object_data[selected_object].duplicate(true)
+    var new_name := selected_object + "_Copy"
+    var n := 2
+    while object_data.has(new_name):
+        new_name = selected_object + "_Copy" + str(n)
+        n += 1
+    object_data[new_name] = source
+    scene_doc.duplicate_object(scene_doc.find_by_name(selected_object), new_name)
+    selected_object = new_name
+    _save_current()
+    diagnostics.log_info("Duplicated " + new_name)
+    _show_panel("Hierarchy")
+
+func _parent_selected() -> void:
+    if selected_object.is_empty(): return
+    var parent_name := ""
+    for name in object_data.keys():
+        if str(name) != selected_object:
+            parent_name = str(name)
+            break
+    if parent_name.is_empty(): return
+    object_data[selected_object]["parent"] = parent_name
+    scene_doc.set_parent(scene_doc.find_by_name(selected_object), scene_doc.find_by_name(parent_name))
+    _save_current()
+    diagnostics.log_info("Parenting: " + selected_object + " -> " + parent_name)
+    _show_panel("Hierarchy")
 
 func _toggle_component(name: String, enabled: bool) -> void:
     if selected_object.is_empty(): return
