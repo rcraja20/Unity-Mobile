@@ -1,0 +1,8 @@
+cmake_minimum_required(VERSION 3.22)
+project(rcengine LANGUAGES CXX)
+add_library(rcengine SHARED engine/src/engine.cpp engine/src/android_jni.cpp)
+target_include_directories(rcengine PUBLIC engine/include)
+target_compile_features(rcengine PUBLIC cxx_std_17)
+find_library(LOG_LIB log)
+find_library(GLES_LIB GLESv3)
+target_link_libraries(rcengine PRIVATE ${LOG_LIB} ${GLES_LIB})
