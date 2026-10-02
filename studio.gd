@@ -226,10 +226,11 @@ func _inspector_panel() -> void:
     comp_title.text = "Components"
     comp_title.add_theme_font_size_override("font_size", 20)
     content.add_child(comp_title)
+    var object_components: Array = object_data[selected_object].get("components", [])
     for component_name in component_data.keys():
         var toggle := CheckButton.new()
         toggle.text = str(component_name)
-        toggle.button_pressed = bool(component_data[component_name].get("enabled", false))
+        toggle.button_pressed = str(component_name) in object_components
         toggle.custom_minimum_size.y = 44
         toggle.toggled.connect(_toggle_component.bind(component_name))
         content.add_child(toggle)
@@ -246,8 +247,12 @@ func _set_transform(key: String, edit: LineEdit) -> void:
     status_label.text = key.capitalize() + " updated"
 
 func _toggle_component(name: String, enabled: bool) -> void:
-    component_data[name]["enabled"] = enabled
-    diagnostics.log_info(name + (" enabled" if enabled else " disabled"))
+    if selected_object.is_empty(): return
+    var list: Array = object_data[selected_object].get("components", []).duplicate()
+    if enabled and name not in list: list.append(name)
+    elif not enabled and name in list: list.erase(name)
+    object_data[selected_object]["components"] = list
+    diagnostics.log_info(name + (" enabled" if enabled else " disabled") + " on " + selected_object)
 
 func _add_component() -> void:
     var name := "CustomComponent" + str(component_data.size() + 1)
@@ -260,8 +265,18 @@ func _scene_action(action: String) -> void:
         object_data.erase(selected_object)
         scene_doc.delete_object(selected_object)
         selected_object = ""
+        _save_current()
         _show_panel("Hierarchy")
         return
+    if action == "Focus":
+        viewport_info.text = "3D VIEWPORT\\n\\nFocused: " + selected_object
+    elif action == "Move":
+        object_data[selected_object]["position"] = "0, 0, 0"
+    elif action == "Rotate":
+        object_data[selected_object]["rotation"] = "0, 0, 0"
+    elif action == "Scale":
+        object_data[selected_object]["scale"] = "1, 1, 1"
+    _save_current()
     status_label.text = action + " action applied to " + selected_object
     if viewport_info: viewport_info.text = "3D VIEWPORT\n\nSelected: " + selected_object + "\nLast action: " + action
 
