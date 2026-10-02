@@ -246,6 +246,34 @@ func _update_scene_camera() -> void:
     scene_camera.position = target + offset
     scene_camera.look_at(target, Vector3.UP)
 
+func _refresh_viewport_objects() -> void:
+    if not scene_world:
+        return
+    for child in scene_world.get_children():
+        if child is MeshInstance3D and child.name.begins_with("RCObject_"):
+            child.queue_free()
+    for name in object_data.keys():
+        var data: Dictionary = object_data[name]
+        if str(data.get("type", "")) in ["Camera3D", "DirectionalLight3D", "Light3D"]:
+            continue
+        var mesh := MeshInstance3D.new()
+        mesh.name = "RCObject_" + str(name)
+        var box := BoxMesh.new()
+        box.size = Vector3.ONE
+        mesh.mesh = box
+        var material := StandardMaterial3D.new()
+        if str(name) == selected_object:
+            material.albedo_color = Color(1.0, 0.75, 0.15)
+            material.emission_enabled = true
+            material.emission = Color(0.18, 0.12, 0.02)
+        else:
+            material.albedo_color = Color(0.35, 0.45, 0.55)
+        mesh.material_override = material
+        mesh.position = _parse_vec3(str(data.get("position", "0,0,0")), Vector3.ZERO)
+        mesh.rotation_degrees = _parse_vec3(str(data.get("rotation", "0,0,0")), Vector3.ZERO)
+        mesh.scale = _parse_vec3(str(data.get("scale", "1,1,1")), Vector3.ONE)
+        scene_world.add_child(mesh)
+
 func _unhandled_input(event: InputEvent) -> void:
     if event is InputEventScreenTouch:
         touch_active = event.pressed
@@ -296,6 +324,7 @@ func _refresh_hierarchy() -> void:
 func _select_object(name: String) -> void:
     selected_object = name
     status_label.text = "Selected: " + name
+    _refresh_viewport_objects()
     _show_panel("Inspector")
 
 func _add_object(kind: String) -> void:
