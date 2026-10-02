@@ -466,6 +466,7 @@ func _open_local_project(name: String) -> void:
     var data := RCProjectStore.load_scene(name)
     if data.has("transforms"):
         object_data = data["transforms"]
+        _rebuild_scene_document()
     status_label.text = "Opened: " + name
     diagnostics.log_info("Opened project: " + name)
     _show_panel("Hierarchy")
@@ -474,8 +475,8 @@ func _save_current() -> void:
     if current_project.is_empty():
         status_label.text = "Create a project first."
         return
-    var data := {"project":current_project,"transforms":object_data,"scene_version":1}
-    if RCProjectStore.save_scene(current_project,data):
+    var data := {"project":current_project,"transforms":object_data,"scene_version":2}
+    if RCProjectStore.save_scene(current_project,data) and RCProjectManager.save_scene_file(current_project, data):
         diagnostics.log_info("Saved project: " + current_project)
         status_label.text = "Saved: " + current_project
     else:
@@ -484,10 +485,38 @@ func _save_current() -> void:
 func _refresh_project_names() -> void:
     projects = RCProjectManager.list_projects()
 
+func _rebuild_scene_document() -> void:
+    scene_doc = RCSceneDocument.new()
+    selected_object = ""
+    for key in object_data.keys():
+        var item: Dictionary = object_data[key]
+        var kind := str(item.get("kind", "Node3D"))
+        var id := scene_doc.create_object(str(key), kind)
+        var pos := _parse_vec3(str(item.get("position", "0, 0, 0")), Vector3.ZERO)
+        var rot := _parse_vec3(str(item.get("rotation", "0, 0, 0")), Vector3.ZERO)
+        var scl := _parse_vec3(str(item.get("scale", "1, 1, 1")), Vector3.ONE)
+        scene_doc.set_transform(id, pos, rot, scl)
+
+func _parse_vec3(value: String, fallback: Vector3) -> Vector3:
+    var parts := value.split(",")
+    if parts.size() != 3: return fallback
+    return Vector3(float(parts[0].strip_edges()), float(parts[1].strip_edges()), float(parts[2].strip_edges()))
+
+func _validate_current_scene() -> bool:
+    var errors := scene_doc.validate()
+    if errors.is_empty():
+        diagnostics.log_info("Scene validation passed.")
+        return true
+    for error in errors:
+        diagnostics.log_error(str(error))
+    status_label.text = "Scene validation failed: " + str(errors.size()) + " issue(s)"
+    return false
+
 func _play_test() -> void:
     if current_project.is_empty():
         status_label.text = "Create or open a project before Play."
         return
+    if not _validate_current_scene(): return
     diagnostics.log_info("Play/Test requested for " + current_project)
-    status_label.text = "Play/Test mode requested"
+    status_label.text = "Play/Test ready — scene validation passed"
     _show_panel("Scene")
