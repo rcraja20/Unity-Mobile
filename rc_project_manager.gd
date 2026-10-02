@@ -40,7 +40,24 @@ static func list_projects() -> Array[String]:
     d.list_dir_end()
     return result
 
-static func backup(project_path: String) -> String:
+static func save_scene_file(project_name: String, scene_data: Dictionary) -> bool:
+    var dir := ensure_project(project_name)
+    var f := FileAccess.open(dir.path_join("scene.json"), FileAccess.WRITE)
+    if f == null: return false
+    f.store_string(JSON.stringify(scene_data, "\\t"))
+    f.close()
+    return true
+
+static func load_scene_file(project_name: String) -> Dictionary:
+    var path := ensure_project(project_name).path_join("scene.json")
+    if not FileAccess.file_exists(path): return {}
+    var f := FileAccess.open(path, FileAccess.READ)
+    if f == null: return {}
+    var parsed = JSON.parse_string(f.get_as_text())
+    f.close()
+    return parsed if parsed is Dictionary else {}
+
+static func backup(project_path: String):
     var backup_path := project_path + ".backup.json"
     var scene_path := project_path.path_join("scene.json")
     if not FileAccess.file_exists(scene_path): return ""
