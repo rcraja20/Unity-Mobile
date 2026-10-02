@@ -622,6 +622,27 @@ func _refresh_profiler() -> void:
     var p := RCMobileOptimizer.profile_snapshot()
     profiler_label.text = "Preset: %s\nFPS: %s\nMemory: %s MB\nRenderer: %s\nScene objects: %s" % [quality_preset,p.fps,p.memory_mb,p.renderer,object_data.size()]
 
+func _export_project_package() -> void:
+    if not project_manager.current_project:
+        diagnostics.log_warning("Open a project before exporting.")
+        return
+    var project_dir := str(project_manager.current_project.get("path", ""))
+    if project_dir.is_empty(): return
+    var export_dir := project_dir.path_join("exports")
+    DirAccess.make_dir_recursive_absolute(export_dir)
+    var report := {
+        "project": project_manager.current_project,
+        "scene": scene_doc.to_dict(),
+        "android_target": "arm64-v8a",
+        "renderer": "Godot Android",
+        "generated_by": "RC Mobile Studio"
+    }
+    var file := FileAccess.open(export_dir.path_join("android_build_config.json"), FileAccess.WRITE)
+    if file:
+        file.store_string(JSON.stringify(report, "\t"))
+        diagnostics.log_info("Android build configuration exported.")
+        status_label.text = "Android build configuration ready"
+
 func _build_panel() -> void:
     build_target_label = Label.new()
     build_target_label.text = "Target: Android ARM64 (arm64-v8a)\nDevelopment / Release"
