@@ -680,6 +680,17 @@ func _accessibility_panel() -> void:
     reduced.text = "Reduced Motion"
     content.add_child(reduced)
 
+func _game_control_press(action: String, pressed: bool) -> void:
+    if game_controls:
+        match action:
+            "forward": game_controls.set_move(Vector2(0, -1) if pressed else Vector2.ZERO)
+            "back": game_controls.set_move(Vector2(0, 1) if pressed else Vector2.ZERO)
+            "left": game_controls.set_move(Vector2(-1, 0) if pressed else Vector2.ZERO)
+            "right": game_controls.set_move(Vector2(1, 0) if pressed else Vector2.ZERO)
+            "sprint": game_controls.set_sprint(pressed)
+            "look_left": game_controls.set_look(Vector2(-1, 0) if pressed else Vector2.ZERO)
+            "look_right": game_controls.set_look(Vector2(1, 0) if pressed else Vector2.ZERO)
+
 func _game_controls_panel() -> void:
     var info := Label.new()
     info.text = "Mobile game controls foundation\nVirtual joystick / look / sprint signals are available to gameplay code."
@@ -762,6 +773,37 @@ func _validate_current_scene() -> bool:
         diagnostics.log_error(str(error))
     status_label.text = "Scene validation failed: " + str(errors.size()) + " issue(s)"
     return false
+
+func _run_game_test() -> void:
+    if not _validate_current_scene():
+        return
+    var test_scene := Node3D.new()
+    test_scene.name = "RCPlayTest"
+    var camera := Camera3D.new()
+    camera.position = Vector3(0, 3, 8)
+    camera.look_at(Vector3.ZERO)
+    test_scene.add_child(camera)
+    var light := DirectionalLight3D.new()
+    light.rotation_degrees = Vector3(-55, -25, 0)
+    test_scene.add_child(light)
+    for name in object_data.keys():
+        var data: Dictionary = object_data[name]
+        var mesh := MeshInstance3D.new()
+        var box := BoxMesh.new()
+        box.size = Vector3.ONE
+        mesh.mesh = box
+        mesh.position = _parse_vec3(str(data.get("position", "0,0,0")), Vector3.ZERO)
+        mesh.rotation_degrees = _parse_vec3(str(data.get("rotation", "0,0,0")), Vector3.ZERO)
+        mesh.scale = _parse_vec3(str(data.get("scale", "1,1,1")), Vector3.ONE)
+        test_scene.add_child(mesh)
+    add_child(test_scene)
+    status_label.text = "Play Test running"
+    diagnostics.log_info("Play Test scene launched")
+    await get_tree().create_timer(3.0).timeout
+    if is_instance_valid(test_scene):
+        test_scene.queue_free()
+    status_label.text = "Play Test finished"
+    diagnostics.log_info("Play Test finished")
 
 func _play_test() -> void:
     if current_project.is_empty():
