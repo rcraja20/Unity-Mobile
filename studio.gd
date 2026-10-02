@@ -622,9 +622,24 @@ func _refresh_profiler() -> void:
     var p := RCMobileOptimizer.profile_snapshot()
     profiler_label.text = "Preset: %s\nFPS: %s\nMemory: %s MB\nRenderer: %s\nScene objects: %s" % [quality_preset,p.fps,p.memory_mb,p.renderer,object_data.size()]
 
-func _export_project_package() -> void:
+func _validate_project_files() -> bool:
     if not project_manager.current_project:
-        diagnostics.log_warning("Open a project before exporting.")
+        diagnostics.log_warning("No project is open.")
+        return false
+    var root := str(project_manager.current_project.get("path", ""))
+    var required := ["project.json", "scene.json", "assets", "scripts", "exports"]
+    var missing := []
+    for item in required:
+        if not FileAccess.file_exists(root.path_join(item)) and not DirAccess.dir_exists_absolute(root.path_join(item)):
+            missing.append(item)
+    if missing.size() > 0:
+        diagnostics.log_warning("Project validation missing: " + ", ".join(missing))
+        return false
+    diagnostics.log_info("Project files validated successfully.")
+    return true
+
+func _export_project_package() -> void:
+    if not _validate_project_files():
         return
     var project_dir := str(project_manager.current_project.get("path", ""))
     if project_dir.is_empty(): return
