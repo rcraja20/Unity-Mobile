@@ -9,6 +9,25 @@ static func ensure_project(name: String) -> String:
     DirAccess.make_dir_recursive_absolute(ProjectSettings.globalize_path(dir))
     return dir
 
+static func project_file(name: String) -> String:
+    return ensure_project(name).path_join("project.json")
+
+static func save_metadata(name: String, metadata: Dictionary) -> bool:
+    var f := FileAccess.open(project_file(name), FileAccess.WRITE)
+    if f == null: return false
+    f.store_string(JSON.stringify(metadata, "\\t"))
+    f.close()
+    return true
+
+static func load_metadata(name: String) -> Dictionary:
+    var path := project_file(name)
+    if not FileAccess.file_exists(path): return {}
+    var f := FileAccess.open(path, FileAccess.READ)
+    if f == null: return {}
+    var parsed = JSON.parse_string(f.get_as_text())
+    f.close()
+    return parsed if parsed is Dictionary else {}
+
 static func list_projects() -> Array[String]:
     var result: Array[String] = []
     var d := DirAccess.open(root())
