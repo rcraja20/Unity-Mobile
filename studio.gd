@@ -471,6 +471,36 @@ func _scene_action(action: String) -> void:
     status_label.text = action + " action applied to " + selected_object
     if viewport_info: viewport_info.text = "3D VIEWPORT\n\nSelected: " + selected_object + "\nLast action: " + action
 
+func _asset_import_action() -> void:
+    var dialog := FileDialog.new()
+    dialog.file_mode = FileDialog.FILE_MODE_OPEN_FILES
+    dialog.access = FileDialog.ACCESS_FILESYSTEM
+    dialog.filters = PackedStringArray(["*.tscn,*.scn,*.obj,*.glb,*.gltf,*.png,*.jpg,*.jpeg,*.webp,*.wav,*.ogg,*.mp3 ; Supported Assets"])
+    dialog.file_selected.connect(_on_asset_file_selected)
+    add_child(dialog)
+    dialog.popup_centered_ratio(0.85)
+
+func _on_asset_file_selected(path: String) -> void:
+    var project_dir := str(project_manager.current_project.get("path", "")) if project_manager.current_project else ""
+    if project_dir.is_empty():
+        diagnostics.log_warning("Open a project before importing assets.")
+        return
+    var source := FileAccess.open(path, FileAccess.READ)
+    if source == null:
+        diagnostics.log_error("Could not read asset: " + path)
+        return
+    var bytes := source.get_buffer(source.get_length())
+    var assets_dir := project_dir.path_join("assets")
+    DirAccess.make_dir_recursive_absolute(assets_dir)
+    var target := assets_dir.path_join(path.get_file())
+    var out := FileAccess.open(target, FileAccess.WRITE)
+    if out == null:
+        diagnostics.log_error("Could not write imported asset.")
+        return
+    out.store_buffer(bytes)
+    diagnostics.log_info("Imported asset: " + path.get_file())
+    _show_panel("Asset Manager")
+
 func _assets_panel() -> void:
     for tab in ["Assets","Materials","Animation","Audio"]:
         var b := Button.new()
@@ -520,6 +550,21 @@ func _asset_manager_panel() -> void:
         b.custom_minimum_size = Vector2(150, 50)
         b.pressed.connect(func(): diagnostics.log_info(label + " asset action requested"))
         row.add_child(b)
+
+func _save_script_to_project() -> void:
+    if not project_manager.current_project:
+        diagnostics.log_warning("Open a project before saving scripts.")
+        return
+    var project_dir := str(project_manager.current_project.get("path", ""))
+    if project_dir.is_empty(): return
+    var scripts_dir := project_dir.path_join("scripts")
+    DirAccess.make_dir_recursive_absolute(scripts_dir)
+    var target := scripts_dir.path_join("Main.gd")
+    var file := FileAccess.open(target, FileAccess.WRITE)
+    if file:
+        file.store_string(script_text)
+        diagnostics.log_info("Saved script: scripts/Main.gd")
+        status_label.text = "Script saved"
 
 func _scripts_panel() -> void:
     var edit := TextEdit.new()
