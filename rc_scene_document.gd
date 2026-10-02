@@ -18,6 +18,20 @@ func delete_object(id: String) -> bool:
             return true
     return false
 
+func validate() -> Array[String]:
+    var errors: Array[String] = []
+    var ids: Dictionary = {}
+    for o in objects:
+        var id := str(o.get("id", ""))
+        if id.is_empty(): errors.append("Scene object has no ID.")
+        elif ids.has(id): errors.append("Duplicate scene object ID: " + id)
+        ids[id] = true
+        if str(o.get("name", "")).strip_edges().is_empty(): errors.append("Scene object " + id + " has no name.")
+    for o in objects:
+        var parent := str(o.get("parent", ""))
+        if not parent.is_empty() and not ids.has(parent): errors.append("Missing parent " + parent + " for " + str(o.get("id", "")))
+    return errors
+
 func find_object(id: String) -> Dictionary:
     for o in objects:
         if o["id"] == id: return o
