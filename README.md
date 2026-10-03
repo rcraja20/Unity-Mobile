@@ -92,3 +92,13 @@ These modules are foundations, not a claim of a production-complete editor/build
 - **25:** Transform gizmo state and Move/Rotate/Scale modes.
 
 These are implementation foundations; actual GPU rendering, file decoding, collision resolution and full touch-driven editor UI still require further work and device testing.
+
+
+## Steps 26–30 — Final Production Foundations
+- **26:** Script compiler/diagnostic interface.
+- **27:** Runtime start/stop/pause/resume state.
+- **28:** Android ARM64 build validation.
+- **29:** Diagnostics and error tracking foundation.
+- **30:** Final Android package manifest foundation.
+
+The roadmap is structurally complete, but a production-ready release still requires actual implementation/testing of GPU rendering, import decoding, collision resolution, scripting backend, Android APK packaging, UI integration and physical-device validation.
