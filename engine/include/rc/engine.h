@@ -13,6 +13,11 @@
 #include "rc/audio.h"
 #include "rc/particles.h"
 #include "rc/animation.h"
+#include "rc/game_ui.h"
+#include "rc/script.h"
+#include "rc/play.h"
+#include "rc/build.h"
+#include "rc/profiler.h"
 namespace rc {
 struct ProjectSettings { std::string name="RC Project"; std::string package_id="com.rcempire.rcmobile"; int version_code=1; };
 struct SceneObject { std::uint64_t id=0; std::string name; float position[3]{0,0,0}; float rotation[3]{0,0,0}; float scale[3]{1,1,1}; };
