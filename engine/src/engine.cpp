@@ -20,7 +20,7 @@ void Engine::resize(int w,int h){
  glViewport(0,0,width_,height_);
 #endif
 }
-void Engine::update(float dt){physics_.step(dt);particles_.update(dt);animator_.update(dt);audio_.update(dt);}
+void Engine::update(float dt){physics_.step(dt);particles_.update(dt);animator_.update(dt);audio_.update(dt);scripts_.update(dt);play_.update(dt);profiler_.frame(dt);}
 void Engine::render(){ renderer().begin_frame(); renderer().end_frame(); }
 void Engine::shutdown(){ initialized_=false; objects_.clear(); }
 bool Engine::create_project(const std::string& path,const ProjectSettings& s){ project_path_=path; settings_=s; objects_.clear(); next_id_=1; return save_project(); }
