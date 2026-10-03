@@ -15,33 +15,46 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+
       - name: Install dependencies
         run: |
           sudo apt-get update
           sudo apt-get install -y python3 python3-pip git unzip openjdk-17-jdk cmake
           python3 -m pip install --upgrade pip scons
+
       - name: Configure Android SDK
         run: |
-          echo "ANDROID_HOME=$HOME/android-sdk" >> "$GITHUB_ENV"
-          mkdir -p "$HOME/android-sdk/cmdline-tools"
+          SDK="$HOME/android-sdk"
+          echo "ANDROID_HOME=$SDK" >> "$GITHUB_ENV"
+          echo "ANDROID_SDK_ROOT=$SDK" >> "$GITHUB_ENV"
+          echo "$SDK/cmdline-tools/latest/bin" >> "$GITHUB_PATH"
+          mkdir -p "$SDK/cmdline-tools"
           curl -fsSL https://dl.google.com/android/repository/commandlinetools-linux-11076708_latest.zip -o /tmp/cmd.zip
           unzip -q /tmp/cmd.zip -d /tmp/android-tools
-          mkdir -p "$HOME/android-sdk/cmdline-tools/latest"
-          mv /tmp/android-tools/cmdline-tools/* "$HOME/android-sdk/cmdline-tools/latest/"
-          yes | "$HOME/android-sdk/cmdline-tools/latest/bin/sdkmanager" --licenses >/dev/null || true
-          "$HOME/android-sdk/cmdline-tools/latest/bin/sdkmanager" platform-tools "platforms;android-35" "build-tools;35.0.0"
+          mkdir -p "$SDK/cmdline-tools/latest"
+          mv /tmp/android-tools/cmdline-tools/* "$SDK/cmdline-tools/latest/"
+          yes | "$SDK/cmdline-tools/latest/bin/sdkmanager" --licenses >/dev/null || true
+          "$SDK/cmdline-tools/latest/bin/sdkmanager" platform-tools "platforms;android-35" "build-tools;35.0.0"
+
       - name: Fetch Godot source
         run: git clone --depth 1 --branch 4.6-stable https://github.com/godotengine/godot.git godot
+
       - name: Build Android ARM64 editor
         working-directory: godot
+        env:
+          ANDROID_HOME: /home/runner/android-sdk
+          ANDROID_SDK_ROOT: /home/runner/android-sdk
         run: scons platform=android arch=arm64 production=yes target=editor generate_android_binaries=yes swappy=no
+
       - name: Collect artifacts
         run: |
           mkdir -p dist
-          find godot/bin/android_editor_builds -type f -name '*.apk' -exec cp {} dist/ \; || true
+          find godot/bin -type f -name '*.apk' -exec cp {} dist/ \; || true
           find dist -type f -print
+
       - name: Verify APK artifact
         run: test -n "$(find dist -type f -name '*.apk' -print -quit)"
+
       - name: Upload editor artifact
         uses: actions/upload-artifact@v4
         with:
