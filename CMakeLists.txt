@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.22)
 project(rcengine LANGUAGES CXX)
-add_library(rcengine SHARED engine/src/engine.cpp engine/src/ui.cpp engine/src/input.cpp engine/src/render.cpp engine/src/camera.cpp engine/src/viewport.cpp engine/src/scene.cpp engine/src/inspector.cpp engine/src/assets.cpp engine/src/physics.cpp engine/src/android_jni.cpp)
+add_library(rcengine SHARED engine/src/engine.cpp engine/src/ui.cpp engine/src/input.cpp engine/src/render.cpp engine/src/camera.cpp engine/src/viewport.cpp engine/src/game_ui.cpp engine/src/scene.cpp engine/src/inspector.cpp engine/src/assets.cpp engine/src/physics.cpp engine/src/android_jni.cpp)
 target_include_directories(rcengine PUBLIC engine/include)
 target_compile_features(rcengine PUBLIC cxx_std_17)
 find_library(LOG_LIB log)
