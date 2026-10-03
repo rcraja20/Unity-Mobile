@@ -73,3 +73,12 @@ The next steps will build the editor systems on top of this original engine core
 - Component base interface and per-entity storage.
 - MeshRenderer, Camera and Light components.
 - Component enable state and cleanup on entity deletion.
+
+## Steps 16–20
+- **16:** Game UI widget/editor model.
+- **17:** Script asset + runtime foundation.
+- **18:** Play/pause/resume game session.
+- **19:** Android ARM64 build settings and validation pipeline.
+- **20:** Frame profiler statistics and final runtime integration.
+
+These modules are foundations, not a claim of a production-complete editor/build toolchain; platform-specific rendering, compilers, Android packaging and full UI remain implementation work.
