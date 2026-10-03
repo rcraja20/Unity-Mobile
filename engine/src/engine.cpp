@@ -1,12 +1,12 @@
 #include "rc/engine.h"
-#include <fstream>
+#include <fstream>\n#include "rc/ui.h"\n#include "rc/input.h"
 #if defined(__ANDROID__)
 #include <GLES3/gl3.h>
 #endif
 namespace rc {
 Engine& instance(){ static Engine e; return e; }
 bool Engine::initialize(int w,int h){
- width_=w>0?w:1; height_=h>0?h:1; initialized_=true;
+ width_=w>0?w:1; height_=h>0?h:1; initialized_=true;\n ui_.set_viewport((float)width_,(float)height_);
 #if defined(__ANDROID__)
  glViewport(0,0,width_,height_);
 #endif
