@@ -42,7 +42,7 @@ public final class MainActivity extends Activity {
   TextView items=new TextView(this);items.setText("Main Camera\nCube\nDirectional Light\n+ new objects");items.setTextColor(Color.LTGRAY);items.setTextSize(13);left.addView(items);
   FrameLayout.LayoutParams lp=new FrameLayout.LayoutParams(190,-1,Gravity.LEFT);root.addView(left,lp);
   LinearLayout right=new LinearLayout(this);right.setOrientation(LinearLayout.VERTICAL);right.setPadding(8,62,8,8);right.setBackgroundColor(Color.argb(205,12,15,20));
-  TextView ih=new TextView(this);ih.setText("INSPECTOR\n\nTransform\nPosition\nRotation\nScale\n\nComponents\nMesh Renderer\nCamera\nLight");ih.setTextColor(Color.WHITE);ih.setTextSize(12);right.addView(ih);
+  TextView ih=new TextView(this);ih.setText("INSPECTOR\n\nTransform\nPosition\nRotation\nScale\n\nComponents\nMesh Renderer\nCamera\nLight\n\nRC Empire Support\nsupport.rcempire@gmail.com\n\nBusiness\nrcempire.official@gmail.com");ih.setTextColor(Color.WHITE);ih.setTextSize(12);right.addView(ih);
   FrameLayout.LayoutParams rp=new FrameLayout.LayoutParams(210,-1,Gravity.RIGHT);root.addView(right,rp);
   setContentView(root);
  }
