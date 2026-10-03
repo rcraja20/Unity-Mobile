@@ -24,6 +24,11 @@
 #include "rc/gizmos.h"
 #include "rc/editor.h"
 #include "rc/collision.h"
+#include "rc/scripting.h"
+#include "rc/android_build.h"
+#include "rc/runtime.h"
+#include "rc/diagnostics.h"
+#include "rc/package.h"
 namespace rc {
 struct ProjectSettings { std::string name="RC Project"; std::string package_id="com.rcempire.rcmobile"; int version_code=1; };
 struct SceneObject { std::uint64_t id=0; std::string name; float position[3]{0,0,0}; float rotation[3]{0,0,0}; float scale[3]{1,1,1}; };
