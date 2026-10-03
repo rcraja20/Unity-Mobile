@@ -48,3 +48,18 @@ The next steps will build the editor systems on top of this original engine core
 - Focus target support
 - Editor viewport controller
 - Mobile-ready drag/pinch control hooks
+
+
+## Step 7 — GameObject / Entity System
+- Stable entity IDs
+- Entity names and active state
+- Transform data
+- Scene create/destroy/find operations
+
+## Step 8 — Hierarchy + Parent/Child
+- Parent/child relationships
+- Child lists
+- Reparenting
+- Cycle protection
+- Recursive hierarchy destruction
+- Inspector transform editing API
