@@ -2,6 +2,7 @@
 #include <cstdint>
 #include <string>
 #include "rc/scene.h"
+#include "rc/component.h"
 namespace rc {
 class Inspector {
 public:
@@ -10,5 +11,6 @@ public:
  bool set_rotation(Scene& scene,std::uint64_t id,Vec3 v);
  bool set_scale(Scene& scene,std::uint64_t id,Vec3 v);
  bool set_active(Scene& scene,std::uint64_t id,bool active);
+ template<class T> T* add_component(ComponentStore& store,std::uint64_t id){return store.add<T>(id);}
 };
 }
