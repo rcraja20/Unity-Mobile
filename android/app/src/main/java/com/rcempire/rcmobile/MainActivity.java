@@ -6,8 +6,8 @@ public final class MainActivity extends Activity {
  static { System.loadLibrary("rcengine"); }
  @Override protected void onCreate(Bundle b){super.onCreate(b);requestWindowFeature(Window.FEATURE_NO_TITLE);getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,WindowManager.LayoutParams.FLAG_FULLSCREEN);
  view=new GLSurfaceView(this);view.setEGLContextClientVersion(3);view.setRenderer(new GLSurfaceView.Renderer(){long last=System.nanoTime();
- public void onSurfaceCreated(javax.microedition.khronos.egl.EGLConfig c){}
- public void onSurfaceChanged(javax.microedition.khronos.egl.EGLConfig c,int w,int h){nativeResize(w,h);nativeInit(w,h);}
+ public void onSurfaceCreated(javax.microedition.khronos.opengles.GL10 gl, javax.microedition.khronos.egl.EGLConfig c){}
+ public void onSurfaceChanged(javax.microedition.khronos.opengles.GL10 gl,int w,int h){nativeResize(w,h);nativeInit(w,h);}
  public void onDrawFrame(javax.microedition.khronos.opengles.GL10 gl){long now=System.nanoTime();float dt=(now-last)/1000000000.0f;last=now;nativeFrame(dt);}});
  view.setOnTouchListener((v,e)->{int a=e.getActionMasked();int index=e.getActionIndex();int n=(a==MotionEvent.ACTION_DOWN||a==MotionEvent.ACTION_POINTER_DOWN?0:(a==MotionEvent.ACTION_UP||a==MotionEvent.ACTION_POINTER_UP||a==MotionEvent.ACTION_CANCEL?1:2));int pointerId=e.getPointerId(index);nativeTouch(n,pointerId,e.getX(index),e.getY(index));return true;});setContentView(view);}
 }
