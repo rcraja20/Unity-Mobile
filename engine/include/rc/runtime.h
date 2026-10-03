@@ -1,0 +1,2 @@
+#pragma once
+namespace rc { class RuntimeState{public:void start(){running_=true;paused_=false;}void stop(){running_=false;}void pause(){if(running_)paused_=true;}void resume(){if(running_)paused_=false;}bool running()const{return running_;}bool paused()const{return paused_;}private:bool running_=false,paused_=false;}; }
