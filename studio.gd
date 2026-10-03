@@ -60,7 +60,7 @@ func _build_ui() -> void:
     root.add_child(top)
 
     var brand := Label.new()
-    brand.text = "  RC MOBILE STUDIO"
+    brand.text = "  UNITY MOBILE"
     brand.add_theme_font_size_override("font_size", 25)
     brand.size_flags_horizontal = Control.SIZE_EXPAND_FILL
     top.add_child(brand)
@@ -80,7 +80,7 @@ func _build_ui() -> void:
     sidebar.custom_minimum_size.x = 235
     sidebar.add_theme_constant_override("separation", 6)
     body.add_child(sidebar)
-    for label in ["Projects","Scene","Hierarchy","Inspector","Assets","Asset Manager","Scripts","Console","Profiler","Build","Privacy","Accessibility","Game Controls"]:
+    for label in ["Projects","Scene","Hierarchy","Inspector","Assets","Asset Manager","Scripts","Console","Profiler","Build","Privacy","Accessibility","Game Controls","About / Support"]:
         var b := Button.new()
         b.text = label
         b.custom_minimum_size.y = 48
@@ -123,6 +123,7 @@ func _show_panel(name: String) -> void:
         "Privacy": _privacy_panel()
         "Accessibility": _accessibility_panel()
         "Game Controls": _game_controls_panel()
+        "About / Support": _about_support_panel()
 
 func _projects_panel() -> void:
     var info := Label.new()
@@ -587,7 +588,7 @@ func _console_panel() -> void:
 func _on_diagnostic(level: String, message: String) -> void:
     if console_text: console_text.text = _diagnostic_text()
 func _diagnostic_text() -> String:
-    var out := "RC Mobile Studio Console\n"
+    var out := "Unity Mobile Console\n"
     for e in diagnostics.entries:
         out += "[%s] %s %s\n" % [e.time,e.level,e.message]
     return out
@@ -649,8 +650,8 @@ func _export_project_package() -> void:
         "project": project_manager.current_project,
         "scene": scene_doc.to_dict(),
         "android_target": "arm64-v8a",
-        "renderer": "Godot Android",
-        "generated_by": "RC Mobile Studio"
+        "renderer": "Android ARM64 native renderer",
+        "generated_by": "Unity Mobile"
     }
     var file := FileAccess.open(export_dir.path_join("android_build_config.json"), FileAccess.WRITE)
     if file:
@@ -696,6 +697,13 @@ func _privacy_panel() -> void:
     path.editable = false
     path.custom_minimum_size.y = 50
     content.add_child(path)
+
+func _about_support_panel() -> void:
+    var info := Label.new()
+    info.text = "Unity Mobile\n\nOriginal implementation with appropriate upstream attribution and licensing preserved.\n\nRC Empire\nSupport: support.rcempire@gmail.com\nBusiness: rcempire.official@gmail.com"
+    info.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+    info.size_flags_vertical = Control.SIZE_EXPAND_FILL
+    content.add_child(info)
 
 func _accessibility_panel() -> void:
     accessibility_label = Label.new()

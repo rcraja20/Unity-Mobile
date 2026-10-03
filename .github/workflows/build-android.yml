@@ -1,4 +1,4 @@
-name: Build Android ARM64
+name: Build Unity Mobile Android ARM64
 on:
   push:
     branches: ["main","master"]
@@ -20,12 +20,26 @@ jobs:
           wget -q https://services.gradle.org/distributions/gradle-8.11.1-bin.zip
           unzip -q gradle-8.11.1-bin.zip
           echo "$PWD/gradle-8.11.1/bin" >> "$GITHUB_PATH"
-      - name: Build ARM64 debug APK
+      - name: Build exactly one ARM64 release APK
         working-directory: android
-        run: gradle --no-daemon assembleDebug
-      - name: Upload APK
+        run: gradle --no-daemon assembleRelease
+      - name: Collect and verify exactly one APK
+        run: |
+          rm -rf dist
+          mkdir -p dist/Unity-Mobile-Android-ARM64
+          find android/app/build/outputs/apk/release -type f -name "*.apk" -print
+          APK_COUNT=$(find android/app/build/outputs/apk/release -type f -name "*.apk" | wc -l)
+          test "$APK_COUNT" -eq 1
+          APK=$(find android/app/build/outputs/apk/release -type f -name "*.apk" -print -quit)
+          cp "$APK" dist/Unity-Mobile-Android-ARM64/Unity-Mobile-arm64.apk
+          FINAL_COUNT=$(find dist -type f -name "*.apk" | wc -l)
+          test "$FINAL_COUNT" -eq 1
+          unzip -p "$APK" AndroidManifest.xml > /tmp/AndroidManifest.xml
+          grep -q 'Unity Mobile' /tmp/AndroidManifest.xml
+          printf '%s\n' "Verified: one APK, Unity Mobile label, arm64-v8a Gradle ABI configuration."
+      - name: Upload exactly one APK artifact
         uses: actions/upload-artifact@v4
         with:
-          name: RC-Mobile-Studio-arm64-debug
-          path: android/app/build/outputs/apk/debug/app-debug.apk
+          name: Unity-Mobile-Android-ARM64
+          path: dist/Unity-Mobile-Android-ARM64/Unity-Mobile-arm64.apk
           if-no-files-found: error

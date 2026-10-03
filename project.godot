@@ -1,6 +1,6 @@
 [application]
-config/name="RC Mobile Studio"
-config/description="RC Empire mobile-first game development studio powered by the Godot open-source engine foundation."
+config/name="Unity Mobile"
+config/description="Unity Mobile — original mobile-first 3D game development/editor application."
 run/main_scene="res://studio.tscn"
 
 [display]
