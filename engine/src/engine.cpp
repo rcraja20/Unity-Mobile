@@ -7,8 +7,10 @@ namespace rc {
 Engine& instance(){ static Engine e; return e; }
 bool Engine::initialize(int w,int h){
  width_=w>0?w:1; height_=h>0?h:1; initialized_=true;\n ui_.set_viewport((float)width_,(float)height_);
+ viewport_.resize(width_,height_);
+ renderer().resize(width_,height_);
 #if defined(__ANDROID__)
- glViewport(0,0,width_,height_);
+ renderer().set_viewport(0,0,width_,height_);
 #endif
  return true;
 }
@@ -19,12 +21,7 @@ void Engine::resize(int w,int h){
 #endif
 }
 void Engine::update(float){}
-void Engine::render(){
-#if defined(__ANDROID__)
- glClearColor(0.035f,0.045f,0.060f,1.0f);
- glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
-#endif
-}
+void Engine::render(){ renderer().begin_frame(); renderer().end_frame(); }
 void Engine::shutdown(){ initialized_=false; objects_.clear(); }
 bool Engine::create_project(const std::string& path,const ProjectSettings& s){ project_path_=path; settings_=s; objects_.clear(); next_id_=1; return save_project(); }
 bool Engine::open_project(const std::string& path){ std::ifstream in(path+"/project.rcproject"); if(!in)return false; project_path_=path; std::getline(in,settings_.name); std::getline(in,settings_.package_id); in>>settings_.version_code; return true; }
