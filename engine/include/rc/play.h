@@ -1,0 +1,2 @@
+#pragma once
+namespace rc { class PlaySession { public: void start(){playing_=true;time_=0;}void stop(){playing_=false;}void pause(){paused_=true;}void resume(){paused_=false;}void update(float dt){if(playing_&&!paused_)time_+=dt;}bool playing()const{return playing_;}bool paused()const{return paused_;}float time()const{return time_;}private:bool playing_=false,paused_=false;float time_=0;};}
