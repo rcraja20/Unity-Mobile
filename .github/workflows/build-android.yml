@@ -14,6 +14,8 @@ jobs:
           java-version: "17"
       - name: Prepare Android SDK
         run: |
+          echo "/usr/local/lib/android/sdk/cmdline-tools/latest/bin" >> "$GITHUB_PATH"
+          export PATH="/usr/local/lib/android/sdk/cmdline-tools/latest/bin:$PATH"
           yes | sdkmanager --licenses >/dev/null 2>&1 || true
           sdkmanager "platform-tools" "platforms;android-35" "build-tools;35.0.0" "cmake;3.22.1" "ndk;27.0.12077973"
       - name: Install Gradle
