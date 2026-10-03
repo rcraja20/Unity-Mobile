@@ -36,9 +36,10 @@ jobs:
           cp "$APK" dist/Unity-Mobile-Android-ARM64/Unity-Mobile-arm64.apk
           FINAL_COUNT=$(find dist -type f -name "*.apk" | wc -l)
           test "$FINAL_COUNT" -eq 1
-          unzip -p "$APK" AndroidManifest.xml > /tmp/AndroidManifest.xml
-          grep -q 'Unity Mobile' /tmp/AndroidManifest.xml
-          printf '%s\n' "Verified: one APK, Unity Mobile label, arm64-v8a Gradle ABI configuration."
+          SDK_BUILD_TOOLS=$(find "$ANDROID_SDK_ROOT/build-tools" -maxdepth 1 -mindepth 1 -type d | sort -V | tail -n 1)
+          "$SDK_BUILD_TOOLS/aapt" dump badging "$APK" | grep -Fq "label='Unity Mobile'"
+          unzip -l "$APK" | grep -Eq 'lib/arm64-v8a/[^/]+\.so'
+          printf '%s\n' "Verified: one APK, Unity Mobile label, arm64-v8a native library."
       - name: Upload exactly one APK artifact
         uses: actions/upload-artifact@v4
         with:
