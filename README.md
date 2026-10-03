@@ -34,3 +34,17 @@ The next steps will build the editor systems on top of this original engine core
 - Two-finger pan delta
 - Pinch distance and zoom delta
 - Two-finger rotation delta
+
+
+## Step 5 — 3D Renderer Foundation
+- Original GLES3 renderer abstraction
+- Depth testing and frame lifecycle
+- Viewport resize handling
+- Clear-frame and renderer state foundation
+
+## Step 6 — Camera + Viewport Controls
+- Orbit camera with pitch limits
+- Pan and zoom controls
+- Focus target support
+- Editor viewport controller
+- Mobile-ready drag/pinch control hooks
