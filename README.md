@@ -63,3 +63,13 @@ The next steps will build the editor systems on top of this original engine core
 - Cycle protection
 - Recursive hierarchy destruction
 - Inspector transform editing API
+
+
+## Step 9 — Inspector + Transform
+- Entity rename, active state, position, rotation and scale editing.
+- Component creation is exposed through the Inspector API.
+
+## Step 10 — Components System
+- Component base interface and per-entity storage.
+- MeshRenderer, Camera and Light components.
+- Component enable state and cleanup on entity deletion.
