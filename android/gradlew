@@ -1,0 +1,4 @@
+#!/bin/sh
+set -e
+if [ -z "$GRADLE_HOME" ]; then echo "Use system Gradle"; fi
+exec gradle "$@"
