@@ -1,0 +1,3 @@
+#pragma once
+#include <string>
+namespace rc { struct AndroidBuildConfig{std::string package_id="com.rcempire.rcmobile";std::string output_apk;bool arm64=true;bool debug=false;}; class AndroidBuilder{public:bool validate(const AndroidBuildConfig&c,std::string&error)const{if(c.package_id.empty()){error="Package ID is required";return false;}if(!c.arm64){error="ARM64 build is required";return false;}return true;}}; }
