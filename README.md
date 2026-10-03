@@ -21,3 +21,16 @@ This repository now starts a separate original engine implementation. It is not 
 - CMake native build integration
 
 The next steps will build the editor systems on top of this original engine core.
+
+## Step 3 — Mobile UI/Layout System
+- Responsive viewport-aware UI node layout
+- Anchors for top-left, top-right, bottom-left, bottom-right and center
+- Touch hit-testing and enabled/visible UI state
+- Native engine UI event routing
+
+## Step 4 — Touch + Multitouch Input
+- Pointer IDs tracked independently
+- Touch down/move/up/cancel forwarding from Android
+- Two-finger pan delta
+- Pinch distance and zoom delta
+- Two-finger rotation delta
