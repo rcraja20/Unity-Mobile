@@ -82,3 +82,13 @@ The next steps will build the editor systems on top of this original engine core
 - **20:** Frame profiler statistics and final runtime integration.
 
 These modules are foundations, not a claim of a production-complete editor/build toolchain; platform-specific rendering, compilers, Android packaging and full UI remain implementation work.
+
+
+## Steps 21–25 — Production Path Foundations
+- **21:** Mesh and texture data models for the renderer.
+- **22:** Asset importer API with common model/texture/audio/animation detection.
+- **23:** Collision-world interface added alongside physics.
+- **24:** Editor selection foundation and editor-side state hooks.
+- **25:** Transform gizmo state and Move/Rotate/Scale modes.
+
+These are implementation foundations; actual GPU rendering, file decoding, collision resolution and full touch-driven editor UI still require further work and device testing.
