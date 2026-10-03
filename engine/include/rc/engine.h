@@ -58,6 +58,13 @@ private:
  Inspector inspector_;
  TouchInput input_;
  Viewport viewport_;
+ PhysicsWorld physics_;
+ ParticleSystem particles_;
+ Animator animator_;
+ AudioSystem audio_;
+ ScriptRuntime scripts_;
+ PlaySession play_;
+ Profiler profiler_;
  std::vector<SceneObject> objects_;
  std::string project_path_;
  std::uint64_t next_id_=1;
