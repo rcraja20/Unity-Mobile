@@ -26,3 +26,7 @@ extern "C" JNIEXPORT jstring JNICALL Java_com_rcempire_rcmobile_MainActivity_nat
 extern "C" JNIEXPORT jboolean JNICALL Java_com_rcempire_rcmobile_MainActivity_nativeSelectObject(JNIEnv*,jobject,jlong id){
  return rc::instance().select_object((std::uint64_t)id);
 }
+
+extern "C" JNIEXPORT jlong JNICALL Java_com_rcempire_rcmobile_MainActivity_nativeSelectedObject(JNIEnv*,jobject){
+ return (jlong)rc::instance().selected_object();
+}
