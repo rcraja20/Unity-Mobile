@@ -18,11 +18,11 @@ public final class MainActivity extends Activity {
  private static native void nativeFrame(float dt); private static native void nativeTouch(int action,int pointerId,float x,float y);
  private static native long nativeCreateObject(String name); private static native boolean nativeDeleteSelected();
  private static native boolean nativePlay(boolean playing); private static native boolean nativePauseToggle();
- private static native boolean nativeSave(); private static native String nativeStatus(); private static native boolean nativeCreateProject(String path); private static native String nativeObjects(); private static native boolean nativeSelectObject(long id);
+ private static native boolean nativeSave(); private static native String nativeStatus(); private static native boolean nativeCreateProject(String path); private static native String nativeObjects(); private static native boolean nativeSelectObject(long id); private static native long nativeSelectedObject();
  static { System.loadLibrary("rcengine"); }
 
  private Button button(String text){Button b=new Button(this);b.setText(text);b.setAllCaps(false);return b;}
- private String selectedObjectId(String data){return "2";}\n @Override protected void onCreate(Bundle b){super.onCreate(b);requestWindowFeature(Window.FEATURE_NO_TITLE);getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,WindowManager.LayoutParams.FLAG_FULLSCREEN);
+ @Override protected void onCreate(Bundle b){super.onCreate(b);requestWindowFeature(Window.FEATURE_NO_TITLE);getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,WindowManager.LayoutParams.FLAG_FULLSCREEN);
   FrameLayout root=new FrameLayout(this);view=new GLSurfaceView(this);view.setEGLContextClientVersion(3);view.setRenderer(new GLSurfaceView.Renderer(){long last=System.nanoTime();
    public void onSurfaceCreated(javax.microedition.khronos.opengles.GL10 gl,javax.microedition.khronos.egl.EGLConfig c){}
    public void onSurfaceChanged(javax.microedition.khronos.opengles.GL10 gl,int w,int h){nativeResize(w,h);nativeInit(w,h);}
@@ -46,15 +46,15 @@ public final class MainActivity extends Activity {
   TextView inspector=new TextView(this);inspector.setTextColor(Color.WHITE);inspector.setTextSize(12);right.addView(inspector);
   FrameLayout.LayoutParams rp=new FrameLayout.LayoutParams(210,-1,Gravity.RIGHT);root.addView(right,rp);
 
-  Runnable refresh=()->{
+  final Runnable[] refresh=new Runnable[1];\n  refresh[0]=()->{
    hierarchyRows.removeAllViews();
    String selected="0";
    String data=nativeObjects();
    for(String line:data.split("\\n")){
     if(line.isEmpty())continue;String[] q=line.split("\\|",-1);if(q.length<12)continue;
-    Button row=button(q[1]);row.setGravity(Gravity.LEFT);row.setOnClickListener(v->{nativeSelectObject(Long.parseLong(q[0]));refresh.run();});
+    Button row=button(q[1]);row.setGravity(Gravity.LEFT);row.setOnClickListener(v->{nativeSelectObject(Long.parseLong(q[0]));refresh[0].run();});
     hierarchyRows.addView(row);
-    if(q[0].equals(selectedObjectId(data))) inspector.setText("INSPECTOR\\n\\n"+q[1]+"\\n\\nTransform\\nPosition: "+q[2]+", "+q[3]+", "+q[4]+"\\nRotation: "+q[5]+", "+q[6]+", "+q[7]+"\\nScale: "+q[8]+", "+q[9]+", "+q[10]+"\\n\\nComponents\\nMesh Renderer\\nCamera\\nLight\\n\\nRC Empire Support\\nsupport.rcempire@gmail.com\\n\\nBusiness\\nrcempire.official@gmail.com");
+    if(q[0].equals(String.valueOf(nativeSelectedObject()))) inspector.setText("INSPECTOR\\n\\n"+q[1]+"\\n\\nTransform\\nPosition: "+q[2]+", "+q[3]+", "+q[4]+"\\nRotation: "+q[5]+", "+q[6]+", "+q[7]+"\\nScale: "+q[8]+", "+q[9]+", "+q[10]+"\\n\\nComponents\\nMesh Renderer\\nCamera\\nLight\\n\\nRC Empire Support\\nsupport.rcempire@gmail.com\\n\\nBusiness\\nrcempire.official@gmail.com");
    }
   };
   refresh.run();
