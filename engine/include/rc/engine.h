@@ -73,7 +73,7 @@ private:
  AudioSystem audio_;
  ScriptRuntime scripts_;
  PlaySession play_;
- Runtime runtime_;
+ RuntimeState runtime_;
  Profiler profiler_;
  std::vector<SceneObject> objects_;
  std::string project_path_;
