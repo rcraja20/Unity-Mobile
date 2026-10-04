@@ -49,6 +49,7 @@ public:
  bool delete_object(std::uint64_t id);
  bool select_object(std::uint64_t id);
  std::uint64_t selected_object() const{return selected_id_;}
+ const SceneObject* object(std::uint64_t id) const;
  bool set_playing(bool playing);
  bool toggle_pause();
  bool is_playing() const{return play_.playing();}
