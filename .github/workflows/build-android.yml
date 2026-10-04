@@ -63,3 +63,5 @@ jobs:
           name: Unity-Mobile-Android-ARM64
           path: dist/Unity-Mobile-Android-ARM64/Unity-Mobile-arm64.apk
           if-no-files-found: error
+
+# Trigger a fresh Android build run.
