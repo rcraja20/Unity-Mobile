@@ -46,7 +46,13 @@ public:
  bool save_project();
  const ProjectSettings& project_settings() const{return settings_;}
  std::uint64_t create_object(const std::string& name);
- bool delete_object(std::uint64_t id);\n bool select_object(std::uint64_t id);\n std::uint64_t selected_object() const{return selected_id_;}\n bool set_playing(bool playing);\n bool toggle_pause();\n bool is_playing() const{return play_.playing();}\n std::string status_text() const;
+ bool delete_object(std::uint64_t id);
+ bool select_object(std::uint64_t id);
+ std::uint64_t selected_object() const{return selected_id_;}
+ bool set_playing(bool playing);
+ bool toggle_pause();
+ bool is_playing() const{return play_.playing();}
+ std::string status_text() const;
  std::vector<SceneObject>& objects(){return objects_;}
  void touch_begin(int pointer_id,float x,float y);
  void touch_move(int pointer_id,float x,float y);
@@ -58,12 +64,15 @@ private:
  Inspector inspector_;
  TouchInput input_;
  Viewport viewport_;
- PhysicsWorld physics_;\n CollisionWorld collision_;\n ComponentStore components_;\n
+ PhysicsWorld physics_;
+ CollisionWorld collision_;
+ ComponentStore components_;
  ParticleSystem particles_;
  Animator animator_;
  AudioSystem audio_;
  ScriptRuntime scripts_;
  PlaySession play_;
+ Runtime runtime_;
  Profiler profiler_;
  std::vector<SceneObject> objects_;
  std::string project_path_;
