@@ -12,3 +12,17 @@ extern "C" JNIEXPORT jboolean JNICALL Java_com_rcempire_rcmobile_MainActivity_na
 extern "C" JNIEXPORT jboolean JNICALL Java_com_rcempire_rcmobile_MainActivity_nativePauseToggle(JNIEnv*,jobject){return rc::instance().toggle_pause();}
 extern "C" JNIEXPORT jboolean JNICALL Java_com_rcempire_rcmobile_MainActivity_nativeSave(JNIEnv*,jobject){return rc::instance().save_project();}
 extern "C" JNIEXPORT jstring JNICALL Java_com_rcempire_rcmobile_MainActivity_nativeStatus(JNIEnv*e,jobject){return e->NewStringUTF(rc::instance().status_text().c_str());}
+
+extern "C" JNIEXPORT jboolean JNICALL Java_com_rcempire_rcmobile_MainActivity_nativeCreateProject(JNIEnv*e,jobject,jstring path){
+ rc::ProjectSettings s; return rc::instance().create_project(jstring_to_string(e,path),s);
+}
+extern "C" JNIEXPORT jstring JNICALL Java_com_rcempire_rcmobile_MainActivity_nativeObjects(JNIEnv*e,jobject){
+ std::string out;
+ for(const auto&o:rc::instance().objects()){
+  out+=std::to_string(o.id)+"|"+o.name+"|"+std::to_string(o.position[0])+"|"+std::to_string(o.position[1])+"|"+std::to_string(o.position[2])+"|"+std::to_string(o.rotation[0])+"|"+std::to_string(o.rotation[1])+"|"+std::to_string(o.rotation[2])+"|"+std::to_string(o.scale[0])+"|"+std::to_string(o.scale[1])+"|"+std::to_string(o.scale[2])+"|"+(o.active?"1":"0")+"\n";
+ }
+ return e->NewStringUTF(out.c_str());
+}
+extern "C" JNIEXPORT jboolean JNICALL Java_com_rcempire_rcmobile_MainActivity_nativeSelectObject(JNIEnv*,jobject,jlong id){
+ return rc::instance().select_object((std::uint64_t)id);
+}
