@@ -1,50 +1,65 @@
 name: Build Unity Mobile Android ARM64
+
 on:
   push:
-    branches: ["main","master"]
+    branches:
+      - main
+      - master
   workflow_dispatch:
+
+permissions:
+  contents: read
+
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-java@v5
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Java 17
+        uses: actions/setup-java@v4
         with:
           distribution: temurin
           java-version: "17"
+
       - name: Prepare Android SDK
+        shell: bash
         run: |
-          echo "/usr/local/lib/android/sdk/cmdline-tools/latest/bin" >> "$GITHUB_PATH"
           export PATH="/usr/local/lib/android/sdk/cmdline-tools/latest/bin:$PATH"
           yes | sdkmanager --licenses >/dev/null 2>&1 || true
           sdkmanager "platform-tools" "platforms;android-35" "build-tools;35.0.0" "cmake;3.22.1" "ndk;27.0.12077973"
-      - name: Install Gradle
+
+      - name: Install Gradle 8.11.1
+        shell: bash
         run: |
           wget -q https://services.gradle.org/distributions/gradle-8.11.1-bin.zip
           unzip -q gradle-8.11.1-bin.zip
           echo "$PWD/gradle-8.11.1/bin" >> "$GITHUB_PATH"
+
       - name: Build exactly one ARM64 release APK
         working-directory: android
-        run: gradle --no-daemon assembleRelease
+        run: gradle --no-daemon --stacktrace assembleRelease
+
       - name: Collect and verify exactly one APK
+        shell: bash
         run: |
+          set -euo pipefail
           rm -rf dist
           mkdir -p dist/Unity-Mobile-Android-ARM64
-          APK_COUNT=$(find android/app/build/outputs/apk/release -type f -name "*.apk" | wc -l)
-          test "$APK_COUNT" -eq 1
-          APK=$(find android/app/build/outputs/apk/release -type f -name "*.apk" -print -quit)
+          mapfile -t APKS < <(find android/app/build/outputs/apk/release -type f -name "*.apk" -print)
+          test "${#APKS[@]}" -eq 1
+          APK="${APKS[0]}"
           cp "$APK" dist/Unity-Mobile-Android-ARM64/Unity-Mobile-arm64.apk
-          FINAL_COUNT=$(find dist -type f -name "*.apk" | wc -l)
-          test "$FINAL_COUNT" -eq 1
-          SDK_BUILD_TOOLS=$(find "$ANDROID_SDK_ROOT/build-tools" -maxdepth 1 -mindepth 1 -type d | sort -V | tail -n 1)
+          test "$(find dist -type f -name "*.apk" | wc -l)" -eq 1
+          SDK_BUILD_TOOLS="$(find "${ANDROID_SDK_ROOT:-$ANDROID_HOME}/build-tools" -maxdepth 1 -mindepth 1 -type d | sort -V | tail -n 1)"
           "$SDK_BUILD_TOOLS/aapt" dump badging "$APK" | grep -Fq "label='Unity Mobile'"
-          unzip -l "$APK" | grep -Eq 'lib/arm64-v8a/[^/]+\.so'
-          printf '%s
-' "Verified: one APK, Unity Mobile label, arm64-v8a native library."
+          unzip -l "$APK" | grep -Eq 'lib/arm64-v8a/[^/]+\\.so'
+          echo "Verified: exactly one APK, Unity Mobile label, arm64-v8a native library."
+
       - name: Upload exactly one APK artifact
         uses: actions/upload-artifact@v4
         with:
           name: Unity-Mobile-Android-ARM64
           path: dist/Unity-Mobile-Android-ARM64/Unity-Mobile-arm64.apk
           if-no-files-found: error
-      # Build trigger refresh for the current Unity Mobile implementation.
